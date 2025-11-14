@@ -6,7 +6,8 @@ import MediaPlayer
 // MARK: - Supported Languages
 
 enum VoiceLanguage: String, CaseIterable, Identifiable {
-    case english = "en-US"
+    case englishUS = "en-US"
+    case englishGB = "en-GB"
     case spanishSpain = "es-ES"
     case spanishArgentina = "es-AR"
     case finnish = "fi-FI"
@@ -15,7 +16,8 @@ enum VoiceLanguage: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .english: return "English"
+        case .englishUS: return "English (US)"
+        case .englishGB: return "English (GB)"
         case .spanishSpain: return "Spanish (Spain)"
         case .spanishArgentina: return "Spanish (Argentina)"
         case .finnish: return "Finnish"
@@ -30,7 +32,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     @Published var isPaused = false
     @Published var currentText = ""
     @Published var speechRate: Float = 0.3 // Default speed (range: 0.0 - 1.0)
-    @Published var selectedLanguage: VoiceLanguage = .english // Default to English
+    @Published var selectedLanguage: VoiceLanguage = .englishUS // Default to English (US)
     @Published var availableVoices: [AVSpeechSynthesisVoice] = []
     @Published var selectedVoice: AVSpeechSynthesisVoice?
 
@@ -102,8 +104,18 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
         var languageVoices = allVoices.filter { $0.language == selectedLanguage.rawValue }
 
         // Sort voices by priority
-        if selectedLanguage == .english {
+        if selectedLanguage == .englishUS {
             let preferredOrder = ["Samantha", "Ava", "Nicky", "Alex", "Tom"]
+            languageVoices.sort { voice1, voice2 in
+                let index1 = preferredOrder.firstIndex(of: voice1.name) ?? Int.max
+                let index2 = preferredOrder.firstIndex(of: voice2.name) ?? Int.max
+                if index1 != index2 {
+                    return index1 < index2
+                }
+                return voice1.name < voice2.name
+            }
+        } else if selectedLanguage == .englishGB {
+            let preferredOrder = ["Daniel", "Kate", "Serena", "Arthur"]
             languageVoices.sort { voice1, voice2 in
                 let index1 = preferredOrder.firstIndex(of: voice1.name) ?? Int.max
                 let index2 = preferredOrder.firstIndex(of: voice2.name) ?? Int.max
@@ -148,9 +160,12 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
 
         // If no saved voice or saved voice not available, select preferred default
         if selectedVoice == nil || !availableVoices.contains(where: { $0.identifier == selectedVoice?.identifier }) {
-            if selectedLanguage == .english {
-                // Try to select Samantha for English, otherwise first available
+            if selectedLanguage == .englishUS {
+                // Try to select Samantha for English (US), otherwise first available
                 selectedVoice = availableVoices.first(where: { $0.name == "Samantha" }) ?? availableVoices.first
+            } else if selectedLanguage == .englishGB {
+                // Try to select Daniel for English (GB), otherwise first available
+                selectedVoice = availableVoices.first(where: { $0.name == "Daniel" }) ?? availableVoices.first
             } else if selectedLanguage == .spanishSpain {
                 // Try to select Mónica for Spanish Spain, otherwise first available
                 selectedVoice = availableVoices.first(where: { $0.name == "Mónica" }) ?? availableVoices.first
