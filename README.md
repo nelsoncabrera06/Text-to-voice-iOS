@@ -157,5 +157,5 @@ Built with SwiftUI and AVFoundation frameworks provided by Apple.
 
 ## Screenshots
 
-<img src="IMG_1267.PNG" width="300" alt="Text to Voice App Screenshot 1">
-<img src="IMG_1268.PNG" width="300" alt="Text to Voice App Screenshot 2">
+<img src="Images/IMG_1267.PNG" width="300" alt="Text to Voice App Screenshot 1">
+<img src="Images/IMG_1268.PNG" width="300" alt="Text to Voice App Screenshot 2">
