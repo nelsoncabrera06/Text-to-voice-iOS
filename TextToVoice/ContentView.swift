@@ -7,6 +7,11 @@
 
 import SwiftUI
 import AVFoundation
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 struct ContentView: View {
     @StateObject private var speechManager = SpeechManager()
@@ -338,9 +343,15 @@ struct ReaderView: View {
     // MARK: - Actions
 
     private func pasteURL() {
+        #if os(iOS)
         if let clipboardString = UIPasteboard.general.string {
             urlInput = clipboardString.trimmingCharacters(in: .whitespacesAndNewlines)
         }
+        #elseif os(macOS)
+        if let clipboardString = NSPasteboard.general.string(forType: .string) {
+            urlInput = clipboardString.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        #endif
     }
 
     private func clearURL() {

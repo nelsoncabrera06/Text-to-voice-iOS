@@ -1,7 +1,9 @@
 import AVFoundation
 import SwiftUI
 import Combine
+#if canImport(MediaPlayer)
 import MediaPlayer
+#endif
 
 // MARK: - Supported Languages
 
@@ -50,6 +52,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     // MARK: - Audio Session Configuration
 
     private func configureAudioSession() {
+        #if os(iOS)
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playback, mode: .spokenAudio, options: [])
@@ -57,11 +60,14 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
         } catch {
             print("Failed to configure audio session: \(error)")
         }
+        #endif
+        // macOS doesn't require audio session configuration
     }
 
     // MARK: - Remote Command Center (Lock Screen Controls)
 
     private func setupRemoteCommandCenter() {
+        #if os(iOS)
         let commandCenter = MPRemoteCommandCenter.shared()
 
         // Play command
@@ -93,6 +99,8 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
             self.stop()
             return .success
         }
+        #endif
+        // macOS doesn't have MPRemoteCommandCenter
     }
 
     // MARK: - Voice Management
@@ -218,6 +226,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     // MARK: - Now Playing Info
 
     private func updateNowPlayingInfo() {
+        #if os(iOS)
         var nowPlayingInfo = [String: Any]()
 
         // Title: First 50 characters of text
@@ -229,10 +238,15 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPaused ? 0.0 : 1.0
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        #endif
+        // macOS doesn't have MPNowPlayingInfoCenter
     }
 
     private func clearNowPlayingInfo() {
+        #if os(iOS)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        #endif
+        // macOS doesn't have MPNowPlayingInfoCenter
     }
 
     // MARK: - Playback Controls
